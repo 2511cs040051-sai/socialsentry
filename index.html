@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SocialSentry | Real-Time Social Media Analytics & Cyberbullying Defense Platform</title>
+
+  <!-- Google Search & SEO Meta Tags -->
+  <meta name="description" content="SocialSentry is an AI-powered real-time social media cyberbullying detection and analytics platform developed at Malla Reddy University CSE by LB. Siddartha Nayak & D. Sairam.">
+  <meta name="keywords" content="SocialSentry, Cyberbullying Detection AI, Social Media Analytics, Malla Reddy University, CSE Project, Real-Time Ingestion, NLP Sentiment Analysis">
+  <meta name="author" content="LB. Siddartha Nayak, D. Sairam">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph / Social Sharing Previews -->
+  <meta property="og:title" content="SocialSentry | Cyberbullying Defense & Analytics">
+  <meta property="og:description" content="Real-time multi-platform social media telemetry & automated 3-strike cyberbullying escalation by MRU CSE.">
+  <meta property="og:type" content="website">
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            cyber: {
+              950: '#060a12',
+              900: '#0b0f19',
+              800: '#111827',
+              700: '#1f2937',
+              600: '#374151',
+              blue: '#3b82f6',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              rose: '#f43f5e',
+              purple: '#8b5cf6',
+              amber: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen flex flex-col bg-[#0b0f19] text-gray-100 antialiased selection:bg-rose-500 selection:text-white font-sans">
+
+  <!-- TOAST CYBERBULLY ALERT BANNER (Dynamically shown on critical alerts) -->
+  <div id="cyberbully-toast-banner" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-3xl w-[94%] bg-red-950/95 border-2 border-red-500/80 text-white px-5 py-3.5 rounded-xl shadow-2xl backdrop-blur-lg flex items-center justify-between transition-all duration-300">
+    <div class="flex items-center space-x-3.5">
+      <div class="p-2.5 bg-red-600/30 rounded-xl text-red-400 border border-red-500/40">
+        <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-red-600 text-white font-extrabold tracking-wider">CRITICAL CYBERBULLYING THREAT</span>
+          <span id="toast-alert-time" class="text-xs text-red-300 font-mono">Just now</span>
+        </div>
+        <h4 id="toast-alert-title" class="text-sm font-bold tracking-wide text-red-100 mt-0.5">High Severity Cyber Harassment Incident</h4>
+        <p id="toast-alert-desc" class="text-xs text-red-200/90 line-clamp-1">Violent threat & targeted identity attack flagged by NLP Engine.</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button onclick="inspectLatestThreat()" class="text-xs px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold transition">Inspect</button>
+      <button onclick="dismissToastAlert()" class="text-red-300 hover:text-white text-xs px-2.5 py-1.5 rounded-lg bg-red-900/60 hover:bg-red-800 transition">✕</button>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- DEDICATED MINIMALIST LOGIN & RBAC SCREEN       -->
+  <!-- ============================================== -->
+  <div id="app-login-view" class="min-h-screen w-full flex items-center justify-center p-4 py-8 relative">
+    
+    <!-- Ambient Cyber Glows -->
+    <div class="absolute -top-32 -left-32 w-80 h-80 bg-rose-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-32 -right-32 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-xl w-full glass-panel rounded-2xl border border-gray-700/80 p-6 sm:p-8 shadow-2xl relative z-10 space-y-5">
+      
+      <!-- Brand & Header -->
+      <div class="text-center space-y-1.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-600 via-purple-600 to-blue-500 mx-auto flex items-center justify-center shadow-lg shadow-rose-500/20 border border-white/10">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-rose-400 via-purple-300 to-blue-400 bg-clip-text text-transparent">SocialSentry</h1>
+          <p class="text-xs text-gray-400 font-medium">Real-Time Social Media Analytics & Automated Cyberbullying Defense</p>
+        </div>
+        <div class="inline-block px-3 py-0.5 rounded-full bg-blue-500/10 text-blue-300 font-mono text-[11px] border border-blue-500/30">
+          Malla Reddy University • Department of CSE
+        </div>
+      </div>
+
+      <!-- Security Notice -->
+      <div class="p-2.5 bg-gray-900/80 rounded-xl border border-gray-800 text-center">
+        <h3 class="text-xs font-bold text-gray-200 uppercase tracking-wider font-mono">Role-Based Access Control (RBAC)</h3>
+        <p class="text-[11px] text-gray-400 mt-0.5">Please select your authorized role or sign in below to enter the live dashboard.</p>
+      </div>
+
+      <!-- 1-Click Role Access Buttons (Viva / Demo Mode) -->
+      <div class="space-y-2.5">
+        <span class="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-wider block">Select Your Role to Access Dashboard:</span>
+        
+        <!-- Role 1: Moderator -->
+        <button onclick="loginAsRole('moderator')" class="w-full text-left p-3 rounded-xl bg-gray-900/90 hover:bg-rose-950/40 border border-gray-800 hover:border-rose-500/50 transition-all group flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center text-base border border-rose-500/30 group-hover:scale-105 transition-transform">
+              👮
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-bold text-gray-100 group-hover:text-rose-300">Lead Cyber Moderator / Investigator</span>
+                <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">FULL CLEARANCE</span>
+              </div>
+              <p class="text-[10px] text-gray-400">LB. Siddartha Nayak (2511CS040028) • Disciplinary Strikes, Account Bans, Incident Dispatch</p>
+            </div>
+          </div>
+          <span class="text-xs text-rose-400 font-bold group-hover:translate-x-1 transition-transform">Enter →</span>
+        </button>
+
+        <!-- Role 2: Researcher -->
+        <button onclick="loginAsRole('researcher')" class="w-full text-left p-3 rounded-xl bg-gray-900/90 hover:bg-blue-950/40 border border-gray-800 hover:border-blue-500/50 transition-all group flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-base border border-blue-500/30 group-hover:scale-105 transition-transform">
+              🔬
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-bold text-gray-100 group-hover:text-blue-300">University Data Science Researcher</span>
+                <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">ANALYTICS & NLP</span>
+              </div>
+              <p class="text-[10px] text-gray-400">D. Sairam (2511CS040051) • Sentiment Trajectory, Topic Velocity & Sandbox</p>
+            </div>
+          </div>
+          <span class="text-xs text-blue-400 font-bold group-hover:translate-x-1 transition-transform">Enter →</span>
+        </button>
+
+        <!-- Role 3: External Examiner -->
+        <button onclick="loginAsRole('guest')" class="w-full text-left p-3 rounded-xl bg-gray-900/90 hover:bg-purple-950/40 border border-gray-800 hover:border-purple-500/50 transition-all group flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center text-base border border-purple-500/30 group-hover:scale-105 transition-transform">
+              🎓
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-bold text-gray-100 group-hover:text-purple-300">External Examiner / Review Panel</span>
+                <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">VIVA EVALUATION</span>
+              </div>
+              <p class="text-[10px] text-gray-400">Viva Project Evaluation Panel • Read-Only Live Review & NLP Verification</p>
+            </div>
+          </div>
+          <span class="text-xs text-purple-400 font-bold group-hover:translate-x-1 transition-transform">Enter →</span>
+        </button>
+      </div>
+
+      <!-- Minimalist RBAC Matrix Breakdown (Moderator vs Researcher) -->
+      <div class="p-3 bg-gray-900/60 rounded-xl border border-gray-800/80 space-y-1.5 font-mono text-[11px]">
+        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Access Permissions Matrix:</span>
+        <div class="grid grid-cols-2 gap-2 text-[10px]">
+          <div class="p-2 rounded-lg bg-rose-950/20 border border-rose-900/30">
+            <span class="text-rose-300 font-bold block">👮 Moderator (Siddartha)</span>
+            <ul class="text-gray-400 mt-1 space-y-0.5 list-disc list-inside">
+              <li>Issue 1st/2nd/3rd Strikes</li>
+              <li>Execute Account Bans</li>
+              <li>Simulate Bully Raids</li>
+              <li>Dispatch Incident Reports</li>
+            </ul>
+          </div>
+          <div class="p-2 rounded-lg bg-blue-950/20 border border-blue-900/30">
+            <span class="text-blue-300 font-bold block">🔬 Researcher (Sairam)</span>
+            <ul class="text-gray-400 mt-1 space-y-0.5 list-disc list-inside">
+              <li>Live Sentiment Trajectory</li>
+              <li>Hashtag Velocity Analytics</li>
+              <li>Interactive NLP Sandbox</li>
+              <li>Telemetry CSV/JSON Export</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="relative flex items-center pt-1">
+        <div class="flex-grow border-t border-gray-800"></div>
+        <span class="flex-shrink mx-3 text-[10px] text-gray-500 font-mono uppercase">Or Custom Sign-In</span>
+        <div class="flex-grow border-t border-gray-800"></div>
+      </div>
+
+      <!-- Credential Form -->
+      <form onsubmit="handleLoginPageSubmit(event)" class="space-y-2.5">
+        <div>
+          <label class="text-[10px] text-gray-400 block mb-1">University Email:</label>
+          <input id="login-screen-email" type="email" value="moderator@mru.ac.in" required class="w-full bg-gray-900 border border-gray-700/80 rounded-xl px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-rose-500 transition font-mono">
+        </div>
+        <div>
+          <label class="text-[10px] text-gray-400 block mb-1">Password:</label>
+          <input id="login-screen-password" type="password" value="admin123" required class="w-full bg-gray-900 border border-gray-700/80 rounded-xl px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-rose-500 transition font-mono">
+        </div>
+        <button type="submit" class="w-full py-2 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-rose-600/30 transition">
+          Authenticate & Enter Dashboard
+        </button>
+      </form>
+
+      <!-- Footer Note -->
+      <div class="text-center text-[10px] text-gray-500 font-mono">
+        Protected by SocialSentry RBAC • Malla Reddy University
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MAIN APP DASHBOARD VIEW (Shown When Logged In) -->
+  <!-- ============================================== -->
+  <div id="app-dashboard-view" class="hidden min-h-screen flex flex-col">
+
+    <!-- TOP APP HEADER -->
+    <header class="sticky top-0 z-40 bg-[#0e1424]/95 backdrop-blur-md border-b border-gray-800/80 px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-3">
+      
+      <!-- Brand & Academic Identification -->
+      <div class="flex items-center space-x-4 w-full lg:w-auto justify-between lg:justify-start">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-600 via-purple-600 to-blue-500 flex items-center justify-center shadow-lg shadow-rose-500/20 border border-white/10">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-rose-400 via-purple-300 to-blue-400 bg-clip-text text-transparent">SocialSentry</span>
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">BULLY DETECTOR AI</span>
+              <span class="hidden sm:inline-block text-[10px] font-mono text-gray-400">| MRU CS</span>
+            </div>
+            <p class="text-[11px] text-gray-400 font-medium">Real-Time Social Media Analytics & Cyberbullying Detection • <span class="text-blue-300">Malla Reddy University</span></p>
+          </div>
+        </div>
+
+        <!-- Real-Time WebSocket & Pipeline Status -->
+        <div class="flex items-center space-x-2.5 pl-3 border-l border-gray-800">
+          <span id="stream-status-badge" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+          <div class="text-left">
+            <span id="stream-status-text" class="text-xs font-mono font-bold text-emerald-400 tracking-wider block">STREAM LIVE</span>
+            <span id="ws-latency-badge" class="text-[10px] font-mono text-gray-400">WS: 12ms</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Controls: Source Selector, Auth Role, Play/Pause, Speed, Simulate Bully Raid, Test NLP, Export, Dark Mode -->
+      <div class="flex items-center flex-wrap gap-2 w-full lg:w-auto justify-end">
+        
+        <!-- Stream Ingestion Source Selector (Ready for Reddit / Simulation) -->
+        <div class="flex items-center text-xs font-medium text-gray-300 bg-gray-800/80 px-2 py-1 rounded-lg border border-gray-700/80">
+          <span class="mr-1.5 text-[11px] text-cyan-400 font-bold">Source:</span>
+          <select id="select-source" onchange="changeIngestionSource(this.value)" class="bg-transparent text-gray-200 font-semibold focus:outline-none cursor-pointer">
+            <option value="simulation" selected class="bg-gray-900">● Simulated Multi-Stream</option>
+            <option value="reddit" class="bg-gray-900">● Live Reddit Stream</option>
+          </select>
+        </div>
+
+        <!-- User Authentication & Role Badge -->
+        <button onclick="openAuthModal()" id="btn-auth-profile" class="flex items-center space-x-2 px-2.5 py-1 rounded-lg bg-gray-800/90 hover:bg-gray-700 border border-gray-700 transition" title="Switch User Role / Login">
+          <img id="nav-user-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face" class="w-5 h-5 rounded-full object-cover border border-rose-500">
+          <span id="nav-user-name" class="text-xs font-bold text-gray-200 hidden sm:inline">LB. Siddartha Nayak</span>
+          <span id="nav-user-role-badge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 uppercase font-bold">MODERATOR</span>
+        </button>
+
+        <!-- Logout Button -->
+        <button onclick="logoutToLoginScreen()" class="px-2 py-1 rounded-lg bg-gray-800/90 hover:bg-rose-950/70 text-gray-400 hover:text-rose-300 border border-gray-700/80 transition text-xs font-semibold flex items-center space-x-1" title="Sign Out & Lock System">
+          <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          <span class="hidden sm:inline">Logout</span>
+        </button>
+
+        <!-- Play / Pause Stream -->
+        <button id="btn-play-pause" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-gray-200 bg-gray-800 hover:bg-gray-700 border border-gray-700/80 flex items-center shadow-sm transition">
+          <svg id="icon-play-pause" class="w-3.5 h-3.5 mr-1 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span id="text-play-pause">Pause</span>
+        </button>
+
+        <!-- Stream Speed Selector -->
+        <div class="flex items-center text-xs font-medium text-gray-400 bg-gray-800/80 px-2 py-1 rounded-lg border border-gray-700/80">
+          <span class="mr-1 text-[11px]">Speed:</span>
+          <select id="select-speed" class="bg-transparent text-gray-200 font-semibold focus:outline-none cursor-pointer">
+            <option value="3000" class="bg-gray-900">0.5x</option>
+            <option value="1800" selected class="bg-gray-900">1x</option>
+            <option value="1000" class="bg-gray-900">2x</option>
+            <option value="500" class="bg-gray-900">4x</option>
+          </select>
+        </div>
+
+        <!-- Simulate Bully Attack / Raid Button -->
+        <button id="btn-simulate-raid" class="px-2.5 py-1 rounded-lg text-xs font-bold text-rose-200 bg-rose-950/70 hover:bg-rose-900 border border-rose-500/60 flex items-center shadow-sm transition group" title="Simulate incoming cyberbully attack to test real-time detection and strike escalation">
+          <svg class="w-3.5 h-3.5 mr-1 text-rose-400 group-hover:scale-125 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          <span>Raid Test</span>
+        </button>
+
+        <!-- Test NLP Sandbox Shortcut -->
+        <button onclick="switchTab('sandbox')" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-purple-200 bg-purple-950/70 hover:bg-purple-900 border border-purple-500/50 flex items-center transition">
+          <svg class="w-3.5 h-3.5 mr-1 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+          <span>Sandbox</span>
+        </button>
+
+        <!-- Export Data -->
+        <button id="btn-export-data" class="px-2.5 py-1 rounded-lg text-xs font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 border border-gray-700 flex items-center transition" title="Export captured cyberbullying and social activity logs">
+          <svg class="w-3.5 h-3.5 mr-1 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          <span>Export</span>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="btn-theme-toggle" class="p-1.5 rounded-lg text-gray-400 hover:text-white bg-gray-800/80 hover:bg-gray-700 border border-gray-700/80 transition" title="Toggle Dark/Light Mode">
+          <svg id="theme-toggle-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- PRIMARY NAVIGATION TABS -->
+    <div class="max-w-7xl mx-auto mt-2.5 pt-2 border-t border-gray-800/60 flex items-center space-x-2 overflow-x-auto pb-1 text-xs">
+      <button data-tab="overview" onclick="switchTab('overview')" class="nav-tab-btn px-3 py-1.5 rounded-lg font-bold bg-rose-600 text-white shadow-md shadow-rose-500/20 flex items-center space-x-1.5 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        <span>Executive Dashboard</span>
+      </button>
+
+      <button data-tab="stream" onclick="switchTab('stream')" class="nav-tab-btn px-3 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 flex items-center space-x-1.5 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        <span>Live Cyberbully Stream</span>
+      </button>
+
+      <button data-tab="watchlist" onclick="switchTab('watchlist')" class="nav-tab-btn px-3 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 flex items-center space-x-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+        <span>Bully Watchlist & Moderation Hub</span>
+      </button>
+
+      <button data-tab="sandbox" onclick="switchTab('sandbox')" class="nav-tab-btn px-3 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 flex items-center space-x-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+        <span>NLP Bully Detection Sandbox</span>
+      </button>
+
+      <button data-tab="hashtags" onclick="switchTab('hashtags')" class="nav-tab-btn px-3 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 flex items-center space-x-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+        <span>Trending Hashtags & Velocity</span>
+      </button>
+
+      <button data-tab="abstract" onclick="switchTab('abstract')" class="nav-tab-btn px-3 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 flex items-center space-x-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        <span>Project Abstract & Architecture</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-5 space-y-5">
+
+    <!-- KPI SUMMARY CARDS: FOCUSED ON SOCIAL ACTIVITY & CYBERBULLYING -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+      
+      <!-- KPI 1: Total Social Media Posts Ingested -->
+      <div class="glass-panel rounded-xl p-4 relative overflow-hidden">
+        <div class="flex items-center justify-between text-xs text-gray-400">
+          <span>Social Media Monitored</span>
+          <span class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline space-x-2">
+          <span id="kpi-total-ingested" class="text-2xl font-extrabold text-white font-mono tracking-tight">142,580</span>
+          <span id="kpi-ingestion-rate" class="text-xs text-blue-400 font-semibold font-mono">+38/sec</span>
+        </div>
+        <div class="mt-1 text-[11px] text-gray-400">Twitter, Reddit, Instagram, YouTube</div>
+      </div>
+
+      <!-- KPI 2: Cyberbullying Incidents Flagged (Main Theme!) -->
+      <div class="glass-panel rounded-xl p-4 relative overflow-hidden border border-rose-500/30">
+        <div class="flex items-center justify-between text-xs text-rose-300">
+          <span class="font-semibold">Cyberbullying Flagged</span>
+          <span class="p-1.5 rounded-lg bg-rose-500/20 text-rose-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline space-x-2">
+          <span id="kpi-bully-count" class="text-2xl font-extrabold text-rose-400 font-mono tracking-tight">1,842</span>
+          <span id="kpi-bully-rate" class="text-xs px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold font-mono">1.29% Rate</span>
+        </div>
+        <div class="mt-1 text-[11px] text-gray-400">Harassment, threats & insults isolated</div>
+      </div>
+
+      <!-- KPI 3: Repeat Bullies & Flagged Accounts -->
+      <div class="glass-panel rounded-xl p-4 relative overflow-hidden border border-amber-500/30">
+        <div class="flex items-center justify-between text-xs text-amber-300">
+          <span class="font-semibold">Repeat Cyberbullies</span>
+          <span class="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline space-x-2">
+          <span id="kpi-serial-bullies" class="text-2xl font-extrabold text-amber-400 font-mono tracking-tight">28</span>
+          <span id="kpi-strikes-issued" class="text-xs text-amber-300 font-mono font-semibold">62 Strikes Issued</span>
+        </div>
+        <div class="mt-1 text-[11px] text-gray-400">Monitored for 3-strike auto ban</div>
+      </div>
+
+      <!-- KPI 4: Net Sentiment Polarity -->
+      <div class="glass-panel rounded-xl p-4 relative overflow-hidden">
+        <div class="flex items-center justify-between text-xs text-gray-400">
+          <span>Net Public Sentiment</span>
+          <span class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path></svg>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline space-x-2">
+          <span id="kpi-pos-rate" class="text-2xl font-extrabold text-emerald-400 font-mono tracking-tight">68.4%</span>
+          <span class="text-xs text-emerald-300 font-semibold">Positive/Safe</span>
+        </div>
+        <div class="mt-1 text-[11px] text-gray-400">NLP Polarity: <span class="text-blue-300">+0.42</span></div>
+      </div>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TAB 1: EXECUTIVE OVERVIEW DASHBOARD VIEW       -->
+    <!-- ============================================== -->
+    <div id="tab-view-overview" class="tab-content space-y-5">
+
+      <!-- TOP VISUAL ANALYTICS ROW -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        
+        <!-- Live Toxicity & Bully Rate Timeline (2 Cols) -->
+        <div class="glass-panel rounded-xl p-4 lg:col-span-2 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h2 class="text-sm font-bold text-gray-100 flex items-center space-x-2">
+                <span>Real-Time Cyberbullying & Toxicity Trajectory</span>
+                <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+              </h2>
+              <p class="text-xs text-gray-400">Continuous sliding window tracking toxic incidents vs overall social interactions</p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">NLP Active</span>
+              <span class="text-xs px-2.5 py-1 rounded bg-gray-800 text-gray-300 font-mono">15m Window</span>
+            </div>
+          </div>
+
+          <div class="relative h-60 w-full">
+            <canvas id="toxicityTrendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Cyberbullying Classification Categories (1 Col) -->
+        <div class="glass-panel rounded-xl p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-sm font-bold text-gray-100">Cyberbullying Breakdown</h2>
+            <span class="text-xs text-rose-400 font-mono font-semibold">Multi-Label NLP</span>
+          </div>
+          <p class="text-xs text-gray-400 mb-2">Categorization of flagged malicious content</p>
+
+          <div class="relative h-56 w-full flex items-center justify-center">
+            <canvas id="bullyCategoryChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MIDDLE ROW: SENTIMENT BREAKDOWN & PLATFORM DISTRIBUTION -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        <!-- Sentiment Donut -->
+        <div class="glass-panel rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Sentiment Distribution</h3>
+            <span class="text-[10px] font-mono text-emerald-400">VADER & Transformer</span>
+          </div>
+          <div class="relative h-44 w-full flex items-center justify-center">
+            <canvas id="sentimentDonutChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Platform Distribution -->
+        <div class="glass-panel rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Monitored Platforms</h3>
+            <span class="text-[10px] font-mono text-blue-400">Live Channels</span>
+          </div>
+          <div class="relative h-44 w-full flex items-center justify-center">
+            <canvas id="platformDistributionChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Real-Time Cyberbully Incident Feed (Mini Alerts) -->
+        <div class="glass-panel rounded-xl p-4 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-rose-300 flex items-center space-x-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+              <span>Recent Bully Incidents</span>
+            </h3>
+            <button onclick="switchTab('watchlist')" class="text-[11px] text-blue-400 hover:underline">Manage All</button>
+          </div>
+          <div id="mini-incident-alerts" class="space-y-2 overflow-y-auto max-h-44 pr-1">
+            <!-- Dynamic Mini Alert items injected by JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM SPLIT VIEW: LIVE INGESTION FEED & TOP BULLIES WATCHLIST -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- LEFT COLUMN: LIVE SOCIAL INGESTION FEED (2 Cols) -->
+        <div class="lg:col-span-2 space-y-3">
+          
+          <!-- Stream Filter & Search Controls -->
+          <div class="glass-panel p-3.5 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-2.5">
+            
+            <!-- Search Bar -->
+            <div class="relative w-full sm:w-72">
+              <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              <input id="input-search" type="text" placeholder="Filter by text, bully, handle..." class="w-full bg-gray-900/90 border border-gray-700/80 rounded-lg pl-9 pr-3 py-1.5 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-rose-500 transition">
+            </div>
+
+            <!-- Filter Dropdowns -->
+            <div class="flex items-center space-x-2 w-full sm:w-auto justify-end flex-wrap gap-y-1">
+              <!-- Toxicity Filter -->
+              <select id="filter-toxicity" class="bg-gray-900/90 border border-gray-700/80 rounded-lg px-2 py-1 text-xs text-rose-300 font-semibold focus:outline-none focus:border-rose-500 cursor-pointer">
+                <option value="all">All Content</option>
+                <option value="bullying_only" selected>⚠ Cyberbullying Only</option>
+                <option value="harassment">Harassment</option>
+                <option value="threat">Threat / Violence</option>
+                <option value="hate_speech">Hate Speech</option>
+                <option value="insult">Insult / Slur</option>
+                <option value="safe_only">Clean & Safe Posts</option>
+              </select>
+
+              <!-- Platform Filter -->
+              <select id="filter-platform" class="bg-gray-900/90 border border-gray-700/80 rounded-lg px-2 py-1 text-xs text-gray-200 focus:outline-none focus:border-blue-500 cursor-pointer">
+                <option value="all">All Platforms</option>
+                <option value="twitter">X (Twitter)</option>
+                <option value="reddit">Reddit</option>
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube</option>
+                <option value="linkedin">LinkedIn</option>
+              </select>
+
+              <!-- Sentiment Filter -->
+              <select id="filter-sentiment" class="bg-gray-900/90 border border-gray-700/80 rounded-lg px-2 py-1 text-xs text-gray-200 focus:outline-none focus:border-blue-500 cursor-pointer">
+                <option value="all">All Sentiments</option>
+                <option value="negative">Negative</option>
+                <option value="positive">Positive</option>
+                <option value="neutral">Neutral</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Feed Header -->
+          <div class="flex items-center justify-between px-1">
+            <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center space-x-2">
+              <span>Live Social Posts & Bully Detection Stream</span>
+              <span class="text-[11px] font-mono font-normal text-rose-400">(Click post to inspect NLP tokens & take moderation action)</span>
+            </h3>
+            <span id="live-stream-counter" class="text-xs text-gray-400 font-mono">Showing: 25 items</span>
+          </div>
+
+          <!-- Dynamic Live Feed Container -->
+          <div id="live-feed-list" class="space-y-2.5 max-h-[640px] overflow-y-auto pr-1">
+            <!-- Injected by JavaScript -->
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: TOP FLAGGED BULLIES & HASHTAG SUMMARY (1 Col) -->
+        <div class="space-y-5">
+
+          <!-- Top Cyberbullies Watchlist Preview -->
+          <div class="glass-panel p-4 rounded-xl border border-rose-500/20">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-bold text-rose-300 uppercase tracking-wider flex items-center space-x-1.5">
+                <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <span>Repeat Cyberbullies</span>
+              </h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">Strike Count</span>
+            </div>
+            <div id="overview-bullies-list" class="space-y-2.5">
+              <!-- Injected by JS -->
+            </div>
+            <button onclick="switchTab('watchlist')" class="w-full mt-3 py-1.5 text-center text-xs text-rose-300 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 rounded-lg transition font-medium">
+              Open Full Cyberbully Moderation Hub →
+            </button>
+          </div>
+
+          <!-- Trending Hashtags Mini Leaderboard -->
+          <div class="glass-panel p-4 rounded-xl">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center space-x-1.5">
+                <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                <span>Trending Hashtags</span>
+              </h3>
+              <span class="text-[10px] text-gray-400 font-mono">Toxicity %</span>
+            </div>
+            <div id="overview-hashtags-list" class="space-y-1.5">
+              <!-- Injected by JS -->
+            </div>
+            <button onclick="switchTab('hashtags')" class="w-full mt-3 py-1.5 text-center text-xs text-cyan-300 bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 rounded-lg transition font-medium">
+              View Topic Velocity Analytics →
+            </button>
+          </div>
+
+          <!-- Academic Badge Card -->
+          <div class="glass-panel p-3.5 rounded-xl border border-blue-500/20 bg-blue-950/10 text-xs">
+            <div class="flex items-center space-x-2 text-blue-300 font-bold mb-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+              <span>Malla Reddy University</span>
+            </div>
+            <p class="text-[11px] text-gray-400 mb-1">Department of Computer Science & Engineering</p>
+            <div class="text-[11px] text-gray-300 font-mono space-y-0.5">
+              <div>• LB.Siddartha nayak (2511CS040028)</div>
+              <div>• D.Sairam (2511CS040051)</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TAB 2: LIVE CYBERBULLY & SOCIAL STREAM (FULL)  -->
+    <!-- ============================================== -->
+    <div id="tab-view-stream" class="tab-content hidden space-y-4">
+      <div class="glass-panel p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center space-x-2">
+            <span>High-Throughput Social Media & Cyberbullying Live Feed</span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          </h2>
+          <p class="text-xs text-gray-400">Monitoring Twitter, Reddit, Instagram, YouTube and classifying every post through the NLP Engine.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-xs px-2.5 py-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono">Auto-Tagger Active</span>
+        </div>
+      </div>
+
+      <div class="glass-panel p-4 rounded-xl">
+        <div id="full-stream-feed-list" class="space-y-3 max-h-[780px] overflow-y-auto pr-1">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TAB 3: CYBERBULLY WATCHLIST & MODERATION HUB   -->
+    <!-- ============================================== -->
+    <div id="tab-view-watchlist" class="tab-content hidden space-y-5">
+      <div class="glass-panel p-5 rounded-xl border border-rose-500/30">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-rose-600 text-white">REPETITIVE OFFENDERS</span>
+              <h2 class="text-lg font-bold text-white">Cyberbullying Watchlist & Automated Strike Engine</h2>
+            </div>
+            <p class="text-xs text-gray-300 mt-1">Users flagged for persistent harassment, threats, or hate speech across social platforms. Automated 3-strike escalation system.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="takeBulkModerationAction('warn')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-600/30 hover:bg-amber-600/50 text-amber-200 border border-amber-500/50 transition">Warn All Level-1</button>
+            <button onclick="takeBulkModerationAction('ban')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition">Ban 3-Strike Bullies</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bullies Grid -->
+      <div id="bullies-full-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TAB 4: NLP CYBERBULLY DETECTION SANDBOX        -->
+    <!-- ============================================== -->
+    <div id="tab-view-sandbox" class="tab-content hidden space-y-5">
+      <div class="glass-panel p-5 rounded-xl">
+        <div class="flex items-center space-x-3 mb-2">
+          <div class="p-2.5 bg-purple-600/20 rounded-xl text-purple-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">Live NLP Cyberbullying & Sentiment Sandbox</h2>
+            <p class="text-xs text-gray-400">Enter custom social media comments or choose sample text to evaluate the real-time NLP classification, toxic phrase highlighting, and threat scoring.</p>
+          </div>
+        </div>
+
+        <!-- Sample Buttons -->
+        <div class="pt-3 border-t border-gray-800 flex items-center space-x-2 overflow-x-auto text-xs pb-1">
+          <span class="text-gray-400 text-[11px] whitespace-nowrap">Load Preset Sample:</span>
+          <button onclick="loadSandboxSample('threat')" class="px-2.5 py-1 rounded bg-rose-950/70 text-rose-300 hover:bg-rose-900 border border-rose-500/40 whitespace-nowrap font-medium">Violent Threat</button>
+          <button onclick="loadSandboxSample('harassment')" class="px-2.5 py-1 rounded bg-amber-950/70 text-amber-300 hover:bg-amber-900 border border-amber-500/40 whitespace-nowrap font-medium">Targeted Harassment</button>
+          <button onclick="loadSandboxSample('insult')" class="px-2.5 py-1 rounded bg-purple-950/70 text-purple-300 hover:bg-purple-900 border border-purple-500/40 whitespace-nowrap font-medium">Degrading Insult</button>
+          <button onclick="loadSandboxSample('safe')" class="px-2.5 py-1 rounded bg-emerald-950/70 text-emerald-300 hover:bg-emerald-900 border border-emerald-500/40 whitespace-nowrap font-medium">Positive Tech Discussion</button>
+          <button onclick="loadSandboxSample('neutral')" class="px-2.5 py-1 rounded bg-blue-950/70 text-blue-300 hover:bg-blue-900 border border-blue-500/40 whitespace-nowrap font-medium">Neutral Ingestion Query</button>
+        </div>
+
+        <!-- Input Box -->
+        <div class="mt-4 space-y-3">
+          <div class="relative">
+            <textarea id="sandbox-input-text" rows="3" placeholder="Type or paste any tweet, comment, or social post to test the cyberbullying detection model..." class="w-full bg-gray-900/90 border border-gray-700/80 rounded-xl p-3.5 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition font-sans"></textarea>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2 text-xs text-gray-400">
+              <span>Author Handle (Optional):</span>
+              <input id="sandbox-author-handle" type="text" value="@test_user" class="bg-gray-900 border border-gray-700 rounded px-2 py-0.5 text-xs text-gray-300 font-mono w-32 focus:outline-none">
+            </div>
+            <button id="btn-run-sandbox" onclick="runSandboxAnalysis()" class="px-5 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-rose-600 hover:from-purple-500 hover:to-rose-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition flex items-center space-x-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span>Analyze with NLP Engine</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sandbox Analysis Results Container -->
+      <div id="sandbox-results" class="hidden glass-panel p-5 rounded-xl border border-gray-700/80 space-y-4">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TAB 5: TRENDING HASHTAGS & VELOCITY            -->
+    <!-- ============================================== -->
+    <div id="tab-view-hashtags" class="tab-content hidden space-y-5">
+      <div class="glass-panel p-5 rounded-xl">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-white">Hashtag Momentum & Topic Analytics</h2>
+            <p class="text-xs text-gray-400">Track viral velocity, mention volume, and cyberbully raid correlation across trending topics.</p>
+          </div>
+          <span class="text-xs font-mono text-cyan-400 px-2 py-1 rounded bg-cyan-950/60 border border-cyan-500/30">Velocity Algorithm: dV/dt</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- Hashtags Bar Chart -->
+        <div class="glass-panel p-5 rounded-xl">
+          <h3 class="text-sm font-bold text-gray-100 mb-1">Top Trending Hashtags by Volume</h3>
+          <p class="text-xs text-gray-400 mb-4">Total monitored mentions in current observation cycle</p>
+          <div class="h-64 w-full">
+            <canvas id="hashtagMomentumChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Detailed Hashtags Velocity Table -->
+        <div class="glass-panel p-5 rounded-xl">
+          <h3 class="text-sm font-bold text-gray-100 mb-1">Topic Velocity & Toxicity Matrix</h3>
+          <p class="text-xs text-gray-400 mb-3">Hashtags flagged with high cyberbullying risk</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="text-[11px] text-gray-400 uppercase border-b border-gray-800">
+                <tr>
+                  <th class="py-2">Hashtag</th>
+                  <th class="py-2">Mentions</th>
+                  <th class="py-2">Velocity</th>
+                  <th class="py-2">Cyberbully %</th>
+                  <th class="py-2">Risk</th>
+                </tr>
+              </thead>
+              <tbody id="hashtags-full-table" class="divide-y divide-gray-800/60 font-mono">
+                <!-- Injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TAB 6: PROJECT ABSTRACT & ACADEMIC ARCHITECTURE-->
+    <!-- ============================================== -->
+    <div id="tab-view-abstract" class="tab-content hidden space-y-5">
+      
+      <!-- Academic Header Banner -->
+      <div class="glass-panel p-6 rounded-2xl border border-blue-500/30 text-center relative overflow-hidden bg-gradient-to-b from-blue-950/20 to-transparent">
+        <div class="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 font-mono text-xs font-bold mb-2 border border-blue-500/40">
+          MALLA REDDY UNIVERSITY • DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING
+        </div>
+        <h1 class="text-2xl font-extrabold text-white tracking-tight">Real-Time Social Media Analytics Platform</h1>
+        <p class="text-xs text-gray-300 mt-1 max-w-xl mx-auto">High-Throughput Social Stream Ingestion, Sentiment Classification, and Automated Cyberbullying & Toxic Behavior Identification</p>
+        
+        <!-- Students details from Abstract -->
+        <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs">
+          <div class="px-4 py-2 rounded-xl bg-gray-900/80 border border-gray-700/80">
+            <span class="text-gray-400 block text-[10px] uppercase font-bold">Student 1</span>
+            <span class="text-white font-bold">LB.Siddartha nayak</span>
+            <span class="text-blue-400 font-mono block text-[11px]">Roll No: 2511CS040028</span>
+          </div>
+          <div class="px-4 py-2 rounded-xl bg-gray-900/80 border border-gray-700/80">
+            <span class="text-gray-400 block text-[10px] uppercase font-bold">Student 2</span>
+            <span class="text-white font-bold">D.Sairam</span>
+            <span class="text-blue-400 font-mono block text-[11px]">Roll No: 2511CS040051</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Abstract Text Card -->
+      <div class="glass-panel p-6 rounded-xl space-y-3">
+        <h3 class="text-base font-bold text-white flex items-center space-x-2">
+          <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <span>Project Abstract</span>
+        </h3>
+        <p class="text-xs text-gray-300 leading-relaxed text-justify">
+          The Real-Time Social Media Analytics Platform is a software-based system designed to collect, process, and analyze social media data in real time to generate meaningful insights from large volumes of online activity. The platform monitors public posts, comments, hashtags, likes, shares, and other user interactions to identify trending topics, user engagement, sentiment, and emerging patterns. Using data analytics and Natural Language Processing (NLP), the system analyzes the content of posts and classifies opinions into positive, negative, or neutral sentiments. It can also track the growth of hashtags and topics, helping users understand what is becoming popular and how public interest changes over time. The analyzed information is presented through an interactive dashboard using charts, graphs, and statistics for easy understanding. The platform can be useful for businesses, organizations, researchers, marketing teams, and cybersecurity professionals to monitor public opinion, understand audience behavior, detect unusual activity, identify emerging trends, and support data-driven decision-making. By providing near real-time analysis and visualization of social media activity, the proposed system aims to make social media monitoring more efficient, accurate, and insightful.
+        </p>
+      </div>
+
+      <!-- Technical Architecture Overview -->
+      <div class="glass-panel p-6 rounded-xl space-y-4">
+        <h3 class="text-base font-bold text-white">System Architecture & Pipeline Flow</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
+          <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-700/80 space-y-1">
+            <span class="text-blue-400 font-bold block">1. Social Ingestion</span>
+            <p class="text-gray-400 text-[11px]">Streaming ingestion from X, Reddit, Instagram, YouTube APIs via Kafka/WebSockets.</p>
+          </div>
+          <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-700/80 space-y-1">
+            <span class="text-rose-400 font-bold block">2. Cyberbully NLP</span>
+            <p class="text-gray-400 text-[11px]">Multi-label classifier detecting Harassment, Threats, Hate Speech, and Insults.</p>
+          </div>
+          <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-700/80 space-y-1">
+            <span class="text-purple-400 font-bold block">3. Strike Engine</span>
+            <p class="text-gray-400 text-[11px]">Tracks repeat offenders, correlates user handles, and triggers strike actions.</p>
+          </div>
+          <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-700/80 space-y-1">
+            <span class="text-emerald-400 font-bold block">4. SQLite Storage</span>
+            <p class="text-gray-400 text-[11px]">Fast ACID transactional database storing posts, bully records, and alerts.</p>
+          </div>
+          <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-700/80 space-y-1">
+            <span class="text-cyan-400 font-bold block">5. Real-Time UI</span>
+            <p class="text-gray-400 text-[11px]">WebSocket live feed, dynamic Chart.js visualizations, and instant alerts.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- NLP DEEP-DIVE & MODERATION MODAL               -->
+  <!-- ============================================== -->
+  <div id="post-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
+    <div class="glass-panel max-w-xl w-full bg-[#111827]/95 border border-gray-700/80 rounded-2xl p-6 shadow-2xl relative">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+        <div class="flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+          <h3 class="text-xs font-bold tracking-wider text-gray-200 uppercase font-mono">NLP Deep-Dive & Cyberbully Moderation Action</h3>
+        </div>
+        <button onclick="closePostModal()" class="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div id="modal-post-details" class="mt-4">
+        <!-- Injected dynamically by openPostModal() in app.js -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- AUTHENTICATION & ROLE ACCESS MODAL             -->
+  <!-- ============================================== -->
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
+    <div class="glass-panel max-w-md w-full bg-[#111827]/95 border border-rose-500/40 rounded-2xl p-6 shadow-2xl relative space-y-4">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-rose-600/20 text-rose-400 flex items-center justify-center border border-rose-500/30">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white tracking-wide">Role-Based Access Control (RBAC)</h3>
+            <p class="text-[11px] text-gray-400">SocialSentry Security & Moderation Access</p>
+          </div>
+        </div>
+        <button onclick="closeAuthModal()" class="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Quick 1-Click Demo Login (Examiner Mode) -->
+      <div>
+        <span class="text-[10px] font-mono font-bold text-rose-300 uppercase block mb-2">⚡ 1-Click Quick Demo Login:</span>
+        <div class="space-y-2">
+          
+          <!-- Role 1: Moderator -->
+          <button onclick="quickLogin('moderator')" class="w-full text-left p-2.5 rounded-xl bg-gray-900/90 hover:bg-rose-950/40 border border-gray-700 hover:border-rose-500/50 transition group flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+              <span class="p-1.5 rounded-lg bg-rose-500/20 text-rose-400 text-xs font-bold">👮</span>
+              <div>
+                <div class="text-xs font-bold text-gray-200 group-hover:text-rose-300">LB. Siddartha Nayak (Lead Moderator)</div>
+                <div class="text-[10px] text-gray-400 font-mono">Full Moderation, Strikes, Bans & Police Escalation</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300">ACTIVE</span>
+          </button>
+
+          <!-- Role 2: Researcher -->
+          <button onclick="quickLogin('researcher')" class="w-full text-left p-2.5 rounded-xl bg-gray-900/90 hover:bg-blue-950/40 border border-gray-700 hover:border-blue-500/50 transition group flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+              <span class="p-1.5 rounded-lg bg-blue-500/20 text-blue-400 text-xs font-bold">🔬</span>
+              <div>
+                <div class="text-xs font-bold text-gray-200 group-hover:text-blue-300">D. Sairam (Data Science Fellow)</div>
+                <div class="text-[10px] text-gray-400 font-mono">Analytics, Sentiment Trends & Hashtag Velocity</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300">RESEARCH</span>
+          </button>
+
+          <!-- Role 3: Guest Examiner -->
+          <button onclick="quickLogin('guest')" class="w-full text-left p-2.5 rounded-xl bg-gray-900/90 hover:bg-purple-950/40 border border-gray-700 hover:border-purple-500/50 transition group flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+              <span class="p-1.5 rounded-lg bg-purple-500/20 text-purple-400 text-xs font-bold">🎓</span>
+              <div>
+                <div class="text-xs font-bold text-gray-200 group-hover:text-purple-300">External Examiner / Review Panel</div>
+                <div class="text-[10px] text-gray-400 font-mono">Read-Only Live Review & NLP Verification</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">GUEST</span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Credential Form Divider -->
+      <div class="relative flex py-1 items-center">
+        <div class="flex-grow border-t border-gray-800"></div>
+        <span class="flex-shrink mx-3 text-[10px] text-gray-500 font-mono uppercase">Or Custom Sign-In</span>
+        <div class="flex-grow border-t border-gray-800"></div>
+      </div>
+
+      <!-- Custom Form -->
+      <form onsubmit="handleCustomLogin(event)" class="space-y-2.5 text-xs">
+        <div>
+          <label class="text-[11px] text-gray-400 block mb-1">University Email:</label>
+          <input id="auth-input-email" type="email" value="moderator@mru.ac.in" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-rose-500">
+        </div>
+        <div>
+          <label class="text-[11px] text-gray-400 block mb-1">Password:</label>
+          <input id="auth-input-password" type="password" value="admin123" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-rose-500">
+        </div>
+        <div class="flex items-center justify-between pt-1">
+          <button type="submit" class="w-full py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition">
+            Authenticate & Open Dashboard
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-gray-800/60 py-3.5 px-4 text-center text-xs text-gray-500 bg-[#0b0f19]">
+    <p>SocialSentry | Real-Time Social Media Analytics & Cyberbullying Detection Platform • Malla Reddy University (LB.Siddartha nayak & D.Sairam)</p>
+  </footer>
+  </div> <!-- /app-dashboard-view -->
+
+  <!-- Application Logic Script -->
+  <script src="app.js"></script>
+</body>
+</html>

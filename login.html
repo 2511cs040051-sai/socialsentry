@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Access Control | SocialSentry</title>
+
+  <!-- Google Search & SEO Meta Tags -->
+  <meta name="description" content="SocialSentry Role-Based Access Control and Authentication Portal. Lead Moderator and Researcher authorization for Malla Reddy University CSE.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen flex items-center justify-center bg-[#0b0f19] text-gray-100 antialiased p-4 relative overflow-hidden font-sans">
+
+  <!-- Ambient Glow Backgrounds -->
+  <div class="absolute -top-32 -left-32 w-80 h-80 bg-rose-600/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-32 -right-32 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Central Card -->
+  <div class="max-w-xl w-full glass-panel rounded-2xl border border-gray-700/80 p-6 sm:p-8 shadow-2xl relative z-10 space-y-6">
+    
+    <!-- Branding & University Header -->
+    <div class="text-center space-y-2">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-600 via-purple-600 to-blue-500 mx-auto flex items-center justify-center shadow-lg shadow-rose-500/20 border border-white/10">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+      </div>
+      <div>
+        <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-rose-400 via-purple-300 to-blue-400 bg-clip-text text-transparent">SocialSentry</h1>
+        <p class="text-xs text-gray-400 font-medium">Real-Time Social Media Analytics & Automated Cyberbullying Defense</p>
+      </div>
+      <div class="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-300 font-mono text-[11px] border border-blue-500/30">
+        Malla Reddy University • Department of CSE
+      </div>
+    </div>
+
+    <!-- Security Gate Notice -->
+    <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 text-center">
+      <h3 class="text-xs font-bold text-gray-200 uppercase tracking-wider font-mono">Role-Based Security Gate (RBAC)</h3>
+      <p class="text-[11px] text-gray-400 mt-0.5">Disciplinary moderation actions require verified authorization before access.</p>
+    </div>
+
+    <!-- 1-Click Fast Role Selection (Viva / Demo Mode) -->
+    <div class="space-y-3">
+      <span class="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-wider block">Select Your Role to Access Dashboard:</span>
+      
+      <!-- Role 1: Moderator -->
+      <button onclick="loginAs('moderator')" class="w-full text-left p-3.5 rounded-xl bg-gray-900/90 hover:bg-rose-950/40 border border-gray-800 hover:border-rose-500/50 transition-all group flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-lg border border-rose-500/30 group-hover:scale-105 transition-transform">
+            👮
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-gray-100 group-hover:text-rose-300">Lead Cyber Moderator / Investigator</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">FULL CLEARANCE</span>
+            </div>
+            <p class="text-[11px] text-gray-400">LB. Siddartha Nayak (2511CS040028) • Disciplinary Strikes, Bans, Raid Injections</p>
+          </div>
+        </div>
+        <span class="text-xs text-rose-400 font-bold group-hover:translate-x-1 transition-transform">Enter →</span>
+      </button>
+
+      <!-- Role 2: Researcher -->
+      <button onclick="loginAs('researcher')" class="w-full text-left p-3.5 rounded-xl bg-gray-900/90 hover:bg-blue-950/40 border border-gray-800 hover:border-blue-500/50 transition-all group flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg border border-blue-500/30 group-hover:scale-105 transition-transform">
+            🔬
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-gray-100 group-hover:text-blue-300">University Data Science Researcher</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">ANALYTICS & NLP</span>
+            </div>
+            <p class="text-[11px] text-gray-400">D. Sairam (2511CS040051) • Sentiment Curves, Hashtag Velocity & Sandbox</p>
+          </div>
+        </div>
+        <span class="text-xs text-blue-400 font-bold group-hover:translate-x-1 transition-transform">Enter →</span>
+      </button>
+
+      <!-- Role 3: External Examiner -->
+      <button onclick="loginAs('guest')" class="w-full text-left p-3.5 rounded-xl bg-gray-900/90 hover:bg-purple-950/40 border border-gray-800 hover:border-purple-500/50 transition-all group flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/30 group-hover:scale-105 transition-transform">
+            🎓
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-gray-100 group-hover:text-purple-300">External Examiner / Review Panel</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">EVALUATION</span>
+            </div>
+            <p class="text-[11px] text-gray-400">Viva Evaluation Panel • Read-Only Live Review & Model Verification</p>
+          </div>
+        </div>
+        <span class="text-xs text-purple-400 font-bold group-hover:translate-x-1 transition-transform">Enter →</span>
+      </button>
+    </div>
+
+    <!-- Minimalist RBAC Matrix Breakdown (Moderator vs Researcher) -->
+    <div class="p-3 bg-gray-900/60 rounded-xl border border-gray-800/80 space-y-1.5 font-mono text-[11px]">
+      <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Access Permissions Matrix:</span>
+      <div class="grid grid-cols-2 gap-2 text-[10px]">
+        <div class="p-2 rounded-lg bg-rose-950/20 border border-rose-900/30">
+          <span class="text-rose-300 font-bold block">👮 Moderator (Siddartha)</span>
+          <ul class="text-gray-400 mt-1 space-y-0.5 list-disc list-inside">
+            <li>Issue 1st/2nd/3rd Strikes</li>
+            <li>Execute Account Bans</li>
+            <li>Simulate Bully Raids</li>
+            <li>Dispatch Incident Reports</li>
+          </ul>
+        </div>
+        <div class="p-2 rounded-lg bg-blue-950/20 border border-blue-900/30">
+          <span class="text-blue-300 font-bold block">🔬 Researcher (Sairam)</span>
+          <ul class="text-gray-400 mt-1 space-y-0.5 list-disc list-inside">
+            <li>Live Sentiment Trajectory</li>
+            <li>Hashtag Velocity Analytics</li>
+            <li>Interactive NLP Sandbox</li>
+            <li>Telemetry CSV/JSON Export</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="relative flex items-center pt-2">
+      <div class="flex-grow border-t border-gray-800"></div>
+      <span class="flex-shrink mx-3 text-[10px] text-gray-500 font-mono uppercase">Or Sign In with Credentials</span>
+      <div class="flex-grow border-t border-gray-800"></div>
+    </div>
+
+    <!-- Standard Login Form -->
+    <form onsubmit="handleFormLogin(event)" class="space-y-3">
+      <div>
+        <label class="text-[11px] text-gray-400 block mb-1">University Email Address:</label>
+        <input id="input-email" type="email" value="moderator@mru.ac.in" required class="w-full bg-gray-900 border border-gray-700/80 rounded-xl px-3.5 py-2 text-xs text-gray-200 focus:outline-none focus:border-rose-500 transition font-mono">
+      </div>
+      <div>
+        <label class="text-[11px] text-gray-400 block mb-1">Password:</label>
+        <input id="input-password" type="password" value="admin123" required class="w-full bg-gray-900 border border-gray-700/80 rounded-xl px-3.5 py-2 text-xs text-gray-200 focus:outline-none focus:border-rose-500 transition font-mono">
+      </div>
+      <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-rose-600/30 transition">
+        Authenticate & Launch Platform
+      </button>
+    </form>
+
+    <!-- Footer Note -->
+    <div class="pt-2 text-center text-[10px] text-gray-500 font-mono">
+      Protected by SocialSentry RBAC • Malla Reddy University CSE
+    </div>
+
+  </div>
+
+  <script>
+    const USER_PROFILES = {
+      moderator: {
+        name: 'LB. Siddartha Nayak',
+        role: 'moderator',
+        email: 'moderator@mru.ac.in',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face'
+      },
+      researcher: {
+        name: 'D. Sairam',
+        role: 'researcher',
+        email: 'researcher@mru.ac.in',
+        avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=face'
+      },
+      guest: {
+        name: 'Guest Reviewer',
+        role: 'guest',
+        email: 'guest@mru.ac.in',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face'
+      }
+    };
+
+    function loginAs(role) {
+      const profile = USER_PROFILES[role] || USER_PROFILES.moderator;
+      localStorage.setItem('socialsentry_user', JSON.stringify(profile));
+      window.location.href = '/';
+    }
+
+    async function handleFormLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('input-email').value;
+      const password = document.getElementById('input-password').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          localStorage.setItem('socialsentry_user', JSON.stringify(data.user));
+          window.location.href = '/';
+        } else {
+          alert(data.detail || 'Authentication failed. Please verify credentials.');
+        }
+      } catch (err) {
+        // Fallback for offline demo
+        loginAs('moderator');
+      }
+    }
+  </script>
+</body>
+</html>
