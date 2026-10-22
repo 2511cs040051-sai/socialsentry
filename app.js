@@ -1967,10 +1967,14 @@ function closeYouTubeStreamModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-function setYouTubePreset(videoId) {
+function setYouTubePreset(target) {
   const input = document.getElementById('yt-stream-input');
   if (input) {
-    input.value = `https://www.youtube.com/watch?v=${videoId}`;
+    if (target.startsWith('@') || target.startsWith('http')) {
+      input.value = target;
+    } else {
+      input.value = `https://www.youtube.com/watch?v=${target}`;
+    }
   }
 }
 
@@ -1984,13 +1988,13 @@ async function handleYouTubeStreamConnect(event) {
 
   const streamUrl = (input ? input.value : '').trim();
   if (!streamUrl) {
-    alert('Please enter a valid YouTube Live URL or video ID.');
+    alert('Please enter a YouTuber handle (e.g. @IShowSpeed) or YouTube Live URL.');
     return;
   }
 
   if (statusEl) statusEl.classList.remove('hidden');
   if (msgEl) {
-    msgEl.textContent = 'Establishing live WebSocket/HTTP handshake with YouTube chat...';
+    msgEl.textContent = `Resolving streamer (${streamUrl}) & establishing chat handshake...`;
     msgEl.className = 'text-rose-300 font-mono';
   }
   if (btn) btn.disabled = true;
@@ -2004,27 +2008,32 @@ async function handleYouTubeStreamConnect(event) {
     const data = await res.json();
 
     if (res.ok && data.success) {
+      const isLive = data.details.is_live;
+      const streamerName = data.details.streamer_name || data.details.video_id;
+
       if (msgEl) {
-        msgEl.textContent = `Connected! Intercepted ${data.details.queue_size} initial live comments.`;
-        msgEl.className = 'text-emerald-400 font-mono font-bold';
+        msgEl.textContent = isLive
+          ? `🟢 LIVE BROADCAST CONNECTED! (${streamerName}) • Intercepted ${data.details.queue_size} comments!`
+          : `🟡 TARGETED STREAMER DEFENSE ACTIVE! (${streamerName}) • ${data.details.queue_size} comments queued!`;
+        msgEl.className = isLive ? 'text-emerald-400 font-mono font-bold' : 'text-amber-400 font-mono font-bold';
       }
       if (selectSource) {
         selectSource.value = 'youtube';
       }
 
       triggerToastAlert({
-        title: '🔴 YOUTUBE LIVE CHAT INTERCEPTOR ACTIVE',
-        desc: `Connected to stream (${data.details.video_id}). Scanning real-time comments through NLP defense engine.`,
-        severity: 'critical'
+        title: isLive ? '🔴 YOUTUBE LIVE CHAT INTERCEPTOR' : '🛡️ STREAMER CHAT DEFENSE ACTIVE',
+        desc: data.message,
+        severity: isLive ? 'critical' : 'info'
       });
 
       setTimeout(() => {
         closeYouTubeStreamModal();
         if (btn) btn.disabled = false;
-      }, 900);
+      }, 1000);
     } else {
       if (msgEl) {
-        msgEl.textContent = data.detail || 'Could not connect to stream. Make sure it is currently LIVE and public.';
+        msgEl.textContent = data.detail || 'Could not connect to streamer.';
         msgEl.className = 'text-red-400 font-mono';
       }
       if (btn) btn.disabled = false;

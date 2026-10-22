@@ -163,11 +163,16 @@ async def target_youtube_stream(payload: dict):
             status_code=400,
             detail="Could not connect to YouTube stream. Please ensure the stream is currently LIVE and public."
         )
+    status_msg = (
+        f"SocialSentry hooked into {res['streamer_name']} YouTube Live broadcast ({res['video_id']}). Now scanning real viewer comments in real time!"
+        if res.get("is_live")
+        else f"Streamer {res['streamer_name']} is currently offline. SocialSentry has loaded a targeted live chat defense monitor for {res['streamer_name']}."
+    )
     return {
         "success": True,
         "active_source": "youtube",
         "details": res,
-        "message": f"SocialSentry hooked into YouTube Live stream ({res['video_id']}). Now scanning viewer comments in real time!"
+        "message": status_msg
     }
 
 

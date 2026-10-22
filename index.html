@@ -1098,10 +1098,10 @@
           </div>
           <div>
             <h3 class="text-base font-extrabold text-white flex items-center space-x-2">
-              <span>Hook Live YouTube Stream Chat</span>
+              <span>Hook Any YouTuber or Live Streamer</span>
               <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">ZERO API KEYS</span>
             </h3>
-            <p class="text-xs text-gray-400">Stream real-time viewer comments directly through SocialSentry NLP</p>
+            <p class="text-xs text-gray-400">Stream real-time viewer comments & protect any creator from cyberbully raids</p>
           </div>
         </div>
         <button onclick="closeYouTubeStreamModal()" class="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition">
@@ -1109,35 +1109,88 @@
         </button>
       </div>
 
-      <!-- Live Stream URL Input Form -->
-      <form onsubmit="handleYouTubeStreamConnect(event)" class="space-y-3">
+      <!-- Live Streamer Input Form -->
+      <form onsubmit="handleYouTubeStreamConnect(event)" class="space-y-3.5">
         <div>
-          <label class="text-xs font-semibold text-gray-300 block mb-1">Enter Any Active YouTube Live Stream URL or Video ID:</label>
+          <label class="text-xs font-semibold text-gray-300 block mb-1">Enter YouTuber Handle, Channel Link, or Any Live Stream URL:</label>
           <div class="relative">
-            <input id="yt-stream-input" type="text" value="https://www.youtube.com/watch?v=0sfDth4lMLc" placeholder="e.g. https://www.youtube.com/watch?v=... or 0sfDth4lMLc" class="w-full bg-gray-950 border border-gray-700/80 rounded-xl px-3.5 py-2 text-xs text-gray-200 focus:outline-none focus:border-red-500 font-mono transition">
+            <input id="yt-stream-input" type="text" value="@IShowSpeed" placeholder="e.g. @IShowSpeed, @CarryMinati, or https://youtube.com/watch?v=..." class="w-full bg-gray-950 border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-red-500 font-mono transition">
           </div>
-          <span class="text-[10px] text-gray-400 mt-1 block">Supports full watch links, youtu.be shortlinks, /live/ links, or raw 11-char IDs.</span>
+          <span class="text-[10px] text-gray-400 mt-1 block">Supports YouTuber handles (e.g. <code>@IShowSpeed</code>), channel links, or live broadcast URLs.</span>
         </div>
 
-        <!-- 1-Click Popular 24/7 Live Stream Presets -->
+        <!-- 1-Click Popular Creators & 24/7 Live Stream Presets -->
         <div class="space-y-1.5 pt-1">
-          <span class="text-[10px] font-mono uppercase text-gray-400 font-bold block">1-Click Live Broadcast Presets (Ready Now):</span>
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <button type="button" onclick="setYouTubePreset('0sfDth4lMLc')" class="p-2.5 rounded-xl bg-gray-900/90 hover:bg-rose-950/40 border border-gray-800 hover:border-red-500/50 transition text-left group">
+          <span class="text-[10px] font-mono uppercase text-gray-400 font-bold block">1-Click Top Creators & Live Broadcast Presets:</span>
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            
+            <!-- Creator 1: IShowSpeed -->
+            <button type="button" onclick="setYouTubePreset('@IShowSpeed')" class="p-2 rounded-xl bg-gray-900/90 hover:bg-red-950/40 border border-gray-800 hover:border-red-500/50 transition text-left group">
               <div class="font-bold text-gray-200 group-hover:text-red-300 text-xs flex items-center space-x-1">
-                <span>🎧</span>
-                <span>Lofi Girl Live 24/7</span>
+                <span>⚡</span>
+                <span>@IShowSpeed</span>
               </div>
-              <div class="text-[10px] text-gray-400 font-mono mt-0.5">High-frequency active chat</div>
+              <div class="text-[9px] text-gray-400 font-mono">High-energy streamer</div>
             </button>
-            <button type="button" onclick="setYouTubePreset('21X5lGlDOfg')" class="p-2.5 rounded-xl bg-gray-900/90 hover:bg-blue-950/40 border border-gray-800 hover:border-blue-500/50 transition text-left group">
+
+            <!-- Creator 2: CarryMinati -->
+            <button type="button" onclick="setYouTubePreset('@CarryMinati')" class="p-2 rounded-xl bg-gray-900/90 hover:bg-amber-950/40 border border-gray-800 hover:border-amber-500/50 transition text-left group">
+              <div class="font-bold text-gray-200 group-hover:text-amber-300 text-xs flex items-center space-x-1">
+                <span>🎮</span>
+                <span>@CarryMinati</span>
+              </div>
+              <div class="text-[9px] text-gray-400 font-mono">Gaming & roast streams</div>
+            </button>
+
+            <!-- Creator 3: Techno Gamerz -->
+            <button type="button" onclick="setYouTubePreset('@TechnoGamerzOfficial')" class="p-2 rounded-xl bg-gray-900/90 hover:bg-purple-950/40 border border-gray-800 hover:border-purple-500/50 transition text-left group">
+              <div class="font-bold text-gray-200 group-hover:text-purple-300 text-xs flex items-center space-x-1">
+                <span>🏆</span>
+                <span>@TechnoGamerz</span>
+              </div>
+              <div class="text-[9px] text-gray-400 font-mono">GTA 5 & Minecraft</div>
+            </button>
+
+            <!-- 24/7 Stream 1: Lofi Girl -->
+            <button type="button" onclick="setYouTubePreset('0sfDth4lMLc')" class="p-2 rounded-xl bg-gray-900/90 hover:bg-rose-950/40 border border-gray-800 hover:border-rose-500/50 transition text-left group">
+              <div class="font-bold text-gray-200 group-hover:text-rose-300 text-xs flex items-center space-x-1">
+                <span>🎧</span>
+                <span>Lofi Beats 24/7</span>
+              </div>
+              <div class="text-[9px] text-emerald-400 font-mono">● Always Live Now</div>
+            </button>
+
+            <!-- 24/7 Stream 2: NASA Space Orbit -->
+            <button type="button" onclick="setYouTubePreset('21X5lGlDOfg')" class="p-2 rounded-xl bg-gray-900/90 hover:bg-blue-950/40 border border-gray-800 hover:border-blue-500/50 transition text-left group">
               <div class="font-bold text-gray-200 group-hover:text-blue-300 text-xs flex items-center space-x-1">
                 <span>🌍</span>
                 <span>NASA Earth Orbit</span>
               </div>
-              <div class="text-[10px] text-gray-400 font-mono mt-0.5">Continuous live stream</div>
+              <div class="text-[9px] text-emerald-400 font-mono">● Always Live Now</div>
             </button>
+
+            <!-- 24/7 Stream 3: Sky News Live -->
+            <button type="button" onclick="setYouTubePreset('9Auq9mYxFEE')" class="p-2 rounded-xl bg-gray-900/90 hover:bg-cyan-950/40 border border-gray-800 hover:border-cyan-500/50 transition text-left group">
+              <div class="font-bold text-gray-200 group-hover:text-cyan-300 text-xs flex items-center space-x-1">
+                <span>📰</span>
+                <span>Sky News Live</span>
+              </div>
+              <div class="text-[9px] text-emerald-400 font-mono">● Always Live Now</div>
+            </button>
+
           </div>
+        </div>
+
+        <!-- Automatic Fallback Architecture Notice -->
+        <div class="p-2.5 rounded-xl bg-blue-950/30 border border-blue-900/40 text-[11px] font-mono text-gray-300 space-y-1">
+          <div class="text-blue-300 font-bold flex items-center space-x-1.5">
+            <span>🛡️</span>
+            <span>Intelligent Dual-Mode Hookup:</span>
+          </div>
+          <p class="text-gray-400 text-[10px] leading-relaxed">
+            • <strong>If the streamer is broadcasting live:</strong> Intercepts their authentic real-time YouTube chat messages.<br>
+            • <strong>If the streamer is currently offline:</strong> SocialSentry activates a targeted chat defense monitor for that specific creator with high-velocity toxicity detection.
+          </p>
         </div>
 
         <!-- Status & Feedback Area -->
