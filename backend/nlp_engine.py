@@ -55,6 +55,8 @@ class CyberbullyNLPEngine:
             (r"\b(incompetent|talentless|useless clown|failure)\b", 0.82),
             (r"\b(shut up|shut your mouth|shut ur mouth)\b", 0.72),
             (r"\b(brainless|retarded|imbecile)\b", 0.89),
+            (r"\b(trash gamer|waste fellow|worst player|uninstall|noob gamer|noob player)\b", 0.86),
+            (r"\b(dhengu|gudha|lanja|puku|bokka)\b", 0.92),
         ]
 
         # 5. Positive Social Sentiment Lexicon

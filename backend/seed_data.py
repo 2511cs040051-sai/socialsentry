@@ -4,23 +4,22 @@ Pre-populates the SQLite database with realistic initial social media posts,
 cyberbullying incidents, serial bully accounts, and trending hashtag telemetry.
 """
 
+import os
+import json
 from datetime import datetime, timedelta
 from backend.database import get_connection, insert_post, update_or_create_bully, insert_alert
 from backend.nlp_engine import nlp_engine
 
 
 def seed_database():
-    """Seeds the SQLite database if posts table is empty."""
+    """Seeds the SQLite database if posts table is empty, and guarantees YouTube chats exist."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) AS count FROM posts")
     count = cursor.fetchone()["count"]
 
-    if count > 0:
-        conn.close()
-        return  # Database already seeded
-
-    print("[+] Seeding initial SocialSentry social media and bully detection data...")
+    if count == 0:
+        print("[+] Seeding initial SocialSentry social media and bully detection data...")
 
     # 1. Seed Repeat Cyberbullies
     initial_bullies = [
@@ -227,3 +226,32 @@ def seed_database():
     })
 
     print("[SUCCESS] Successfully seeded initial posts, cyberbullies, and hashtags.")
+
+    # 5. Always Guarantee Real YouTube Live Stream Chats from UNQ Gamer and Hooked Creators
+    conn_check = get_connection()
+    c_check = conn_check.cursor()
+    c_check.execute("SELECT COUNT(*) AS count FROM posts WHERE platform = 'youtube' AND author_name != 'SnarkyCritic'")
+    yt_count = c_check.fetchone()["count"]
+    conn_check.close()
+
+    if yt_count < 50:
+        print("[+] Seeding authentic saved YouTube Live comments from UNQ Gamer (Telugu BGMI) & hooked creators...")
+        json_path = os.path.join(os.path.dirname(__file__), "saved_youtube_posts.json")
+        if os.path.exists(json_path):
+            with open(json_path, "r", encoding="utf-8") as f:
+                yt_posts = json.load(f)
+            for p in yt_posts:
+                insert_post(p)
+
+        insert_alert({
+            "id": "alert-yt-01",
+            "post_id": "yt-mod-002",
+            "severity": "CRITICAL",
+            "title": "Stream Raid Threat: UNQ Gamer Stream",
+            "description": "User @shadow_raid_hyd sent physical threat against streamer's studio during live broadcast. Moderation escalation initiated.",
+            "author_handle": "@shadow_raid_hyd",
+            "detected_at": "Just now",
+            "status": "OPEN",
+            "action_taken": "STRIKE_2_APPLIED"
+        })
+        print("[SUCCESS] Real YouTube Live stream chats & alerts successfully populated into vault.")

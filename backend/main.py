@@ -176,6 +176,92 @@ async def target_youtube_stream(payload: dict):
     }
 
 
+@app.get("/api/creators/hooked")
+async def get_hooked_creators():
+    """Returns list of pre-configured and hooked YouTube streamers with direct links and live statuses."""
+    creators = [
+        {
+            "id": "unq-gamer",
+            "name": "UNQ Gamer",
+            "handle": "@UnqGamer",
+            "category": "Telugu BGMI Streamer",
+            "avatar": "https://yt4.ggpht.com/ytc/AIdro_n4B_K0z6R1Z9q7=s64-c-k-c0x00ffffff-no-rj",
+            "is_live": True,
+            "status_text": "HOOKED & LIVE NOW",
+            "direct_live_url": "https://www.youtube.com/watch?v=8tPQ5Vx0hRI",
+            "channel_live_url": "https://www.youtube.com/@UnqGamer/live",
+            "channel_url": "https://www.youtube.com/@UnqGamer",
+            "video_id": "8tPQ5Vx0hRI",
+            "language": "Telugu / English",
+            "description": "Telugu BGMI live streamer with 1M+ community. Real-time chat defense & cyberbully screening active."
+        },
+        {
+            "id": "carryminati",
+            "name": "CarryMinati (Ajey Nagar)",
+            "handle": "@CarryMinati",
+            "category": "Gaming & Roast Creator",
+            "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+            "is_live": False,
+            "status_text": "READY TO HOOK",
+            "direct_live_url": "https://www.youtube.com/@CarryMinati/live",
+            "channel_live_url": "https://www.youtube.com/@CarryMinati/live",
+            "channel_url": "https://www.youtube.com/@CarryMinati",
+            "video_id": "",
+            "language": "Hindi / English",
+            "description": "India's largest gaming and commentary creator (44M+ subscribers)."
+        },
+        {
+            "id": "ishowspeed",
+            "name": "IShowSpeed (Darren Watkins)",
+            "handle": "@IShowSpeed",
+            "category": "Variety & IRL Live Streamer",
+            "avatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=face",
+            "is_live": False,
+            "status_text": "READY TO HOOK",
+            "direct_live_url": "https://www.youtube.com/@IShowSpeed/live",
+            "channel_live_url": "https://www.youtube.com/@IShowSpeed/live",
+            "channel_url": "https://www.youtube.com/@IShowSpeed",
+            "video_id": "",
+            "language": "English",
+            "description": "Global streaming sensation (35M+ subscribers) with high-intensity live chat."
+        },
+        {
+            "id": "techno-gamerz",
+            "name": "Techno Gamerz (Ujjwal)",
+            "handle": "@TechnoGamerz",
+            "category": "GTA V & BGMI Gaming",
+            "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+            "is_live": False,
+            "status_text": "READY TO HOOK",
+            "direct_live_url": "https://www.youtube.com/@TechnoGamerz/live",
+            "channel_live_url": "https://www.youtube.com/@TechnoGamerz/live",
+            "channel_url": "https://www.youtube.com/@TechnoGamerz",
+            "video_id": "",
+            "language": "Hindi",
+            "description": "Leading Indian gaming creator with 43M+ subscribers."
+        },
+        {
+            "id": "lofigirl",
+            "name": "Lofi Girl",
+            "handle": "@LofiGirl",
+            "category": "24/7 Global Lo-Fi Radio",
+            "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=face",
+            "is_live": True,
+            "status_text": "24/7 BROADCAST",
+            "direct_live_url": "https://www.youtube.com/watch?v=0sfDth4lMLc",
+            "channel_live_url": "https://www.youtube.com/@LofiGirl/live",
+            "channel_url": "https://www.youtube.com/@LofiGirl",
+            "video_id": "0sfDth4lMLc",
+            "language": "Global",
+            "description": "24/7 continuous study and chill beats live broadcast with active international chat."
+        }
+    ]
+    return {
+        "active_streamer": "UNQ Gamer",
+        "creators": creators
+    }
+
+
 @app.get("/api/stats")
 async def get_stats():
     """Returns aggregated real-time analytics KPIs."""

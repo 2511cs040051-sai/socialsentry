@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   connectWebSocket();
   loadInitialData();
   startFallbackLoop();
+  checkUrlParameters();
 });
 
 // ========================================================
@@ -168,17 +169,33 @@ async function loadInitialData() {
   }
 
   try {
-    const [postsRes, bulliesRes, hashRes] = await Promise.all([
-      fetch('/api/posts?limit=80'),
+    const [postsRes, ytRes, bulliesRes, hashRes] = await Promise.all([
+      fetch('/api/posts?limit=60'),
+      fetch('/api/posts?platform=youtube&limit=60'),
       fetch('/api/bullies'),
       fetch('/api/hashtags')
     ]);
 
+    let combinedPosts = [];
     if (postsRes.ok) {
       const postsData = await postsRes.json();
-      state.posts = postsData.posts || [];
-      renderLiveFeeds();
+      combinedPosts = postsData.posts || [];
     }
+
+    if (ytRes.ok) {
+      const ytData = await ytRes.json();
+      const ytPosts = ytData.posts || [];
+      const seen = new Set(combinedPosts.map(p => p.id));
+      ytPosts.forEach(p => {
+        if (!seen.has(p.id)) {
+          combinedPosts.push(p);
+          seen.add(p.id);
+        }
+      });
+    }
+
+    state.posts = combinedPosts;
+    renderLiveFeeds();
 
     if (bulliesRes.ok) {
       const bulliesData = await bulliesRes.json();
@@ -541,6 +558,7 @@ function renderKPIs() {
 function renderLiveFeeds() {
   const overviewFeedEl = document.getElementById('live-feed-list');
   const fullFeedEl = document.getElementById('full-stream-feed-list');
+  const vaultFeedEl = document.getElementById('youtube-vault-feed-list');
 
   const filtered = filterPosts(state.posts);
 
@@ -555,6 +573,13 @@ function renderLiveFeeds() {
 
   if (overviewFeedEl) overviewFeedEl.innerHTML = html;
   if (fullFeedEl) fullFeedEl.innerHTML = html;
+
+  if (vaultFeedEl) {
+    const ytOnly = state.posts.filter(p => (p.platform || '').toLowerCase() === 'youtube');
+    vaultFeedEl.innerHTML = ytOnly.length > 0
+      ? ytOnly.map(post => createPostCardHTML(post)).join('')
+      : `<div class="p-8 text-center text-gray-500 text-xs">No saved YouTube comments found. Click 'Re-Sync Chats' to load.</div>`;
+  }
 }
 
 function filterPosts(posts) {
@@ -1311,6 +1336,10 @@ function switchTab(tabId) {
       btn.className = 'nav-tab-btn px-3 py-1.5 rounded-lg font-medium text-gray-400 hover:text-white hover:bg-gray-800/60 flex items-center space-x-1.5 transition';
     }
   });
+
+  if (tabId === 'youtube-vault') {
+    renderLiveFeeds();
+  }
 }
 
 function initUIEventListeners() {
@@ -1435,7 +1464,7 @@ function initUIEventListeners() {
   }
 }
 
-function filterByPlatform(platform) {
+async function filterByPlatform(platform) {
   const platformSelect = document.getElementById('filter-platform');
   const toxSelect = document.getElementById('filter-toxicity');
   if (platformSelect) {
@@ -1446,12 +1475,75 @@ function filterByPlatform(platform) {
     toxSelect.value = 'all';
     state.filters.toxicity = 'all';
   }
+
+  // Dynamically fetch and merge posts for this platform from backend
+  try {
+    const res = await fetch(`/api/posts?platform=${platform}&limit=100`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.posts && data.posts.length > 0) {
+        const existingIds = new Set(state.posts.map(p => p.id));
+        const newPosts = data.posts.filter(p => !existingIds.has(p.id));
+        state.posts = [...newPosts, ...state.posts];
+      }
+    }
+  } catch (err) {
+    console.error('Could not fetch platform posts:', err);
+  }
+
   renderLiveFeeds();
   triggerToastAlert({
     title: 'VAULT FILTER APPLIED',
-    desc: `Filtering live feed to show all saved ${platform.toUpperCase()} stream chats.`,
+    desc: `Displaying authentic saved ${platform.toUpperCase()} stream chats (UNQ Gamer & hooked creators).`,
     severity: 'info'
   });
+}
+
+/**
+ * 1-Click Fast Access to Hooked YouTubers & Chat Vault directly from Login Screen.
+ */
+function loginAndOpenYouTube() {
+  loginAsRole('guest');
+  setTimeout(() => {
+    switchTab('youtube-vault');
+    filterByPlatform('youtube');
+  }, 200);
+}
+
+/**
+ * Directly hooks a preset creator from the cards.
+ */
+async function hookPresetStreamer(target) {
+  openYouTubeStreamModal();
+  setYouTubePreset(target);
+  const fakeEvent = { preventDefault: () => {} };
+  await handleYouTubeStreamConnect(fakeEvent);
+}
+
+/**
+ * Checks URL query parameters to support direct review links like ?platform=youtube or ?tab=youtube-vault.
+ */
+function checkUrlParameters() {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const platformParam = urlParams.get('platform');
+    const tabParam = urlParams.get('tab');
+    const sourceParam = urlParams.get('source');
+
+    if (platformParam === 'youtube' || sourceParam === 'youtube' || tabParam === 'youtube-vault') {
+      if (!authState.isLoggedIn) {
+        loginAsRole('guest');
+      }
+      setTimeout(() => {
+        if (tabParam === 'youtube-vault' || platformParam === 'youtube') {
+          switchTab('youtube-vault');
+        }
+        filterByPlatform('youtube');
+      }, 300);
+    }
+  } catch (e) {
+    console.error('Error checking URL params:', e);
+  }
 }
 
 // ========================================================
