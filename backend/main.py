@@ -12,9 +12,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
+from datetime import datetime
+import random
+
 from backend.database import (
     init_db, get_posts, get_bullies, update_bully_action,
-    get_trending_hashtags, get_recent_alerts, get_system_stats
+    get_trending_hashtags, get_recent_alerts, get_system_stats,
+    insert_post, update_or_create_bully, insert_alert
 )
 from backend.seed_data import seed_database
 from backend.nlp_engine import nlp_engine
@@ -23,7 +27,8 @@ from backend.connectors import ingestion_manager
 from backend.auth import authenticate_user, generate_session_token, LoginRequest, PRECONFIGURED_USERS
 from backend.models import (
     AnalyzeRequest, AnalyzeResponse,
-    BullyActionRequest, BulliesListResponse, HashtagsListResponse
+    BullyActionRequest, BulliesListResponse, HashtagsListResponse,
+    PostCreate
 )
 
 # Root directory for static assets
@@ -175,6 +180,99 @@ async def list_posts(
     return {
         "total": len(posts),
         "posts": posts
+    }
+
+
+@app.post("/api/posts/ingest")
+async def ingest_public_post(payload: PostCreate):
+    """
+    Public Live Post Ingestion & Audit Scanner.
+    Ingests user-submitted or real public posts into the live defense pipeline:
+    Runs multi-label NLP threat detection, updates repeat offender strikes in SQLite,
+    persists the record, and broadcasts the live event across WebSockets to all connected clients.
+    """
+    content = payload.content.strip()
+    if not content:
+        raise HTTPException(status_code=400, detail="Post content cannot be empty.")
+
+    handle = payload.author_handle or "@guest_user"
+    if not handle.startswith("@"):
+        handle = "@" + handle
+    name = payload.author_name or handle.replace("@", "").capitalize()
+    platform = (payload.platform or "twitter").lower()
+
+    # 1. Real-time NLP Cyberbullying & Sentiment Analysis
+    nlp_res = nlp_engine.analyze(content, handle)
+
+    # 2. Construct post object
+    post_id = f"p-usr-{int(datetime.now().timestamp()*1000)}"
+    post_dict = {
+        "id": post_id,
+        "platform": platform,
+        "author_name": name,
+        "author_handle": handle,
+        "author_avatar": payload.author_avatar or "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+        "content": content,
+        "timestamp": datetime.now().strftime("%I:%M %p"),
+        "sentiment": nlp_res["sentiment"],
+        "sentiment_score": nlp_res["sentiment_score"],
+        "is_bullying": nlp_res["is_bullying"],
+        "toxicity_score": nlp_res["toxicity_score"],
+        "toxicity_type": nlp_res["toxicity_type"],
+        "risk_level": nlp_res["risk_level"],
+        "flagged_tokens": nlp_res["flagged_tokens"],
+        "likes": random.randint(1, 15),
+        "shares": random.randint(0, 5),
+        "comments": random.randint(0, 3)
+    }
+
+    # 3. Commit to SQLite Database
+    insert_post(post_dict)
+
+    # 4. If cyberbullying, update strike count & create alert
+    bully_record = None
+    if nlp_res["is_bullying"]:
+        bully_record = update_or_create_bully(
+            handle=handle,
+            name=name,
+            avatar=post_dict["author_avatar"],
+            platform=platform,
+            is_violation=True,
+            risk_level=nlp_res["risk_level"]
+        )
+
+        alert_data = {
+            "id": f"alt-{int(datetime.now().timestamp()*1000)}",
+            "post_id": post_id,
+            "severity": "critical" if nlp_res["risk_level"] == "CRITICAL" else "high",
+            "title": f"{nlp_res['toxicity_type'].upper()} Incident Detected",
+            "description": f"Flagged malicious content from {handle}. Strike #{bully_record['strike_count']}/3 applied.",
+            "author_handle": handle,
+            "detected_at": datetime.now().strftime("%I:%M %p")
+        }
+        insert_alert(alert_data)
+
+        # Broadcast live critical alert
+        await ws_manager.broadcast({
+            "type": "BULLY_ALERT",
+            "alert": alert_data,
+            "bully": bully_record,
+            "metrics": get_system_stats()
+        })
+
+    # 5. Broadcast post to all live WebSocket dashboards
+    await ws_manager.broadcast({
+        "type": "NEW_POST",
+        "post": post_dict,
+        "metrics": get_system_stats()
+    })
+
+    return {
+        "success": True,
+        "post": post_dict,
+        "nlp": nlp_res,
+        "bully": bully_record,
+        "metrics": get_system_stats()
     }
 
 
