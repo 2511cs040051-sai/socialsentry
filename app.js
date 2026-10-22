@@ -1925,3 +1925,116 @@ function closeDossierModal() {
 function printDossier() {
   window.print();
 }
+
+// ========================================================
+// 10. REAL-TIME YOUTUBE LIVE STREAM CONNECTOR HANDLERS
+// ========================================================
+
+async function changeIngestionSource(sourceId) {
+  if (sourceId === 'youtube') {
+    openYouTubeStreamModal();
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/ingestion/source', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source_id: sourceId })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      triggerToastAlert({
+        title: 'INGESTION SOURCE UPDATED',
+        desc: `Switched stream input to: ${sourceId.toUpperCase()}`,
+        severity: 'info'
+      });
+    }
+  } catch (e) {
+    console.warn('Source switch offline fallback:', e);
+  }
+}
+
+function openYouTubeStreamModal() {
+  const modal = document.getElementById('youtube-stream-modal');
+  const statusEl = document.getElementById('yt-connection-status');
+  if (statusEl) statusEl.classList.add('hidden');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeYouTubeStreamModal() {
+  const modal = document.getElementById('youtube-stream-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function setYouTubePreset(videoId) {
+  const input = document.getElementById('yt-stream-input');
+  if (input) {
+    input.value = `https://www.youtube.com/watch?v=${videoId}`;
+  }
+}
+
+async function handleYouTubeStreamConnect(event) {
+  event.preventDefault();
+  const input = document.getElementById('yt-stream-input');
+  const statusEl = document.getElementById('yt-connection-status');
+  const msgEl = document.getElementById('yt-status-message');
+  const btn = document.getElementById('btn-yt-connect');
+  const selectSource = document.getElementById('select-source');
+
+  const streamUrl = (input ? input.value : '').trim();
+  if (!streamUrl) {
+    alert('Please enter a valid YouTube Live URL or video ID.');
+    return;
+  }
+
+  if (statusEl) statusEl.classList.remove('hidden');
+  if (msgEl) {
+    msgEl.textContent = 'Establishing live WebSocket/HTTP handshake with YouTube chat...';
+    msgEl.className = 'text-rose-300 font-mono';
+  }
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/ingestion/youtube', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stream_url: streamUrl })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      if (msgEl) {
+        msgEl.textContent = `Connected! Intercepted ${data.details.queue_size} initial live comments.`;
+        msgEl.className = 'text-emerald-400 font-mono font-bold';
+      }
+      if (selectSource) {
+        selectSource.value = 'youtube';
+      }
+
+      triggerToastAlert({
+        title: '🔴 YOUTUBE LIVE CHAT INTERCEPTOR ACTIVE',
+        desc: `Connected to stream (${data.details.video_id}). Scanning real-time comments through NLP defense engine.`,
+        severity: 'critical'
+      });
+
+      setTimeout(() => {
+        closeYouTubeStreamModal();
+        if (btn) btn.disabled = false;
+      }, 900);
+    } else {
+      if (msgEl) {
+        msgEl.textContent = data.detail || 'Could not connect to stream. Make sure it is currently LIVE and public.';
+        msgEl.className = 'text-red-400 font-mono';
+      }
+      if (btn) btn.disabled = false;
+    }
+  } catch (err) {
+    if (msgEl) {
+      msgEl.textContent = 'Network error contacting SocialSentry backend.';
+      msgEl.className = 'text-red-400 font-mono';
+    }
+    if (btn) btn.disabled = false;
+  }
+}
+

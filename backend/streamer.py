@@ -177,7 +177,7 @@ class SocialMediaStreamer:
             "platform": base.get("platform", "twitter"),
             "author_name": base["author"],
             "author_handle": base["handle"],
-            "author_avatar": f"https://images.unsplash.com/photo-{1500000000000 + random.randint(1000, 9999999)}?w=100&h=100&fit=crop&crop=face",
+            "author_avatar": base.get("avatar") or f"https://images.unsplash.com/photo-{1500000000000 + random.randint(1000, 9999999)}?w=100&h=100&fit=crop&crop=face",
             "content": base["content"],
             "timestamp": now_str,
             "likes": random.randint(1, 150),

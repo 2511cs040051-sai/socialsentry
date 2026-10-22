@@ -141,7 +141,7 @@ async def get_ingestion_sources():
 
 @app.post("/api/ingestion/source")
 async def set_ingestion_source(payload: dict):
-    """Switches active ingestion stream between Simulation and Live Reddit."""
+    """Switches active ingestion stream between Simulation, YouTube Live, and Reddit."""
     source_id = payload.get("source_id", "simulation")
     ok = ingestion_manager.set_source(source_id)
     if not ok:
@@ -150,6 +150,24 @@ async def set_ingestion_source(payload: dict):
         "success": True,
         "active_source": ingestion_manager.active_source_id,
         "message": f"Switched stream ingestion source to {source_id}."
+    }
+
+
+@app.post("/api/ingestion/youtube")
+async def target_youtube_stream(payload: dict):
+    """Connects SocialSentry to a real-time YouTube live stream URL or video ID."""
+    target = payload.get("stream_url") or payload.get("video_id") or "0sfDth4lMLc"
+    res = await ingestion_manager.set_youtube_target(target)
+    if not res["success"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not connect to YouTube stream. Please ensure the stream is currently LIVE and public."
+        )
+    return {
+        "success": True,
+        "active_source": "youtube",
+        "details": res,
+        "message": f"SocialSentry hooked into YouTube Live stream ({res['video_id']}). Now scanning viewer comments in real time!"
     }
 
 
