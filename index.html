@@ -1111,12 +1111,36 @@
 
       <!-- Live Streamer Input Form -->
       <form onsubmit="handleYouTubeStreamConnect(event)" class="space-y-3.5">
+        
+        <!-- FEATURED: UNQ GAMER (TELUGU BGMI STREAMER - CURRENTLY LIVE) -->
+        <div class="p-3 rounded-xl bg-gradient-to-r from-red-950/90 via-purple-950/60 to-blue-950/90 border-2 border-red-500 shadow-xl shadow-red-600/30 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold text-lg shadow-md">
+              🎮
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="text-sm font-extrabold text-white">UNQ Gamer</span>
+                <span class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-red-600 text-white font-bold animate-pulse flex items-center space-x-1">
+                  <span>●</span>
+                  <span>LIVE NOW</span>
+                </span>
+                <span class="text-[10px] font-mono text-cyan-300 font-bold">Telugu BGMI</span>
+              </div>
+              <p class="text-[11px] text-gray-300 mt-0.5 font-mono">Pubg Mobile Punju VS Petta • Real Live Telugu Chat</p>
+            </div>
+          </div>
+          <button type="button" onclick="setYouTubePreset('8tPQ5Vx0hRI')" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md transition flex items-center space-x-1">
+            <span>Select Stream</span>
+          </button>
+        </div>
+
         <div>
           <label class="text-xs font-semibold text-gray-300 block mb-1">Enter YouTuber Handle, Channel Link, or Any Live Stream URL:</label>
           <div class="relative">
-            <input id="yt-stream-input" type="text" value="@IShowSpeed" placeholder="e.g. @IShowSpeed, @CarryMinati, or https://youtube.com/watch?v=..." class="w-full bg-gray-950 border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-red-500 font-mono transition">
+            <input id="yt-stream-input" type="text" value="https://www.youtube.com/watch?v=8tPQ5Vx0hRI" placeholder="e.g. @UnqGamer, https://www.youtube.com/watch?v=8tPQ5Vx0hRI" class="w-full bg-gray-950 border border-gray-700/80 rounded-xl px-3.5 py-2.5 text-xs text-gray-200 focus:outline-none focus:border-red-500 font-mono transition">
           </div>
-          <span class="text-[10px] text-gray-400 mt-1 block">Supports YouTuber handles (e.g. <code>@IShowSpeed</code>), channel links, or live broadcast URLs.</span>
+          <span class="text-[10px] text-gray-400 mt-1 block">Supports YouTuber handles (e.g. <code>@UnqGamer</code>), channel links, or live broadcast URLs.</span>
         </div>
 
         <!-- 1-Click Popular Creators & 24/7 Live Stream Presets -->
@@ -1124,6 +1148,15 @@
           <span class="text-[10px] font-mono uppercase text-gray-400 font-bold block">1-Click Top Creators & Live Broadcast Presets:</span>
           <div class="grid grid-cols-3 gap-2 text-xs">
             
+            <!-- Creator 0: UNQ Gamer (Telugu BGMI) -->
+            <button type="button" onclick="setYouTubePreset('8tPQ5Vx0hRI')" class="p-2 rounded-xl bg-gray-900/90 hover:bg-red-950/40 border border-red-500/80 hover:border-red-500 transition text-left group">
+              <div class="font-bold text-red-300 group-hover:text-red-200 text-xs flex items-center space-x-1">
+                <span>🔴</span>
+                <span>UNQ Gamer</span>
+              </div>
+              <div class="text-[9px] text-emerald-400 font-mono">● LIVE Telugu BGMI</div>
+            </button>
+
             <!-- Creator 1: IShowSpeed -->
             <button type="button" onclick="setYouTubePreset('@IShowSpeed')" class="p-2 rounded-xl bg-gray-900/90 hover:bg-red-950/40 border border-gray-800 hover:border-red-500/50 transition text-left group">
               <div class="font-bold text-gray-200 group-hover:text-red-300 text-xs flex items-center space-x-1">
@@ -1165,15 +1198,6 @@
               <div class="font-bold text-gray-200 group-hover:text-blue-300 text-xs flex items-center space-x-1">
                 <span>🌍</span>
                 <span>NASA Earth Orbit</span>
-              </div>
-              <div class="text-[9px] text-emerald-400 font-mono">● Always Live Now</div>
-            </button>
-
-            <!-- 24/7 Stream 3: Sky News Live -->
-            <button type="button" onclick="setYouTubePreset('9Auq9mYxFEE')" class="p-2 rounded-xl bg-gray-900/90 hover:bg-cyan-950/40 border border-gray-800 hover:border-cyan-500/50 transition text-left group">
-              <div class="font-bold text-gray-200 group-hover:text-cyan-300 text-xs flex items-center space-x-1">
-                <span>📰</span>
-                <span>Sky News Live</span>
               </div>
               <div class="text-[9px] text-emerald-400 font-mono">● Always Live Now</div>
             </button>

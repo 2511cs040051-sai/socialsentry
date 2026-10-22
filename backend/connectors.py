@@ -223,6 +223,19 @@ class YouTubeLiveConnector(BaseSocialConnector):
     async def resolve_video_id(self, target: str) -> str:
         """Resolves 11-character video ID from raw ID, watch URL, live URL, or channel URL/handle."""
         target = target.strip()
+        
+        # Check creator aliases
+        aliases = {
+            "unq gamer": "8tPQ5Vx0hRI",
+            "unqgamer": "8tPQ5Vx0hRI",
+            "@unqgamer": "8tPQ5Vx0hRI",
+            "@unqgamerraju": "8tPQ5Vx0hRI",
+            "unq": "8tPQ5Vx0hRI"
+        }
+        if target.lower() in aliases:
+            self.streamer_name = "UNQ Gamer (Telugu BGMI)"
+            return aliases[target.lower()]
+
         # 1. Direct 11-character video ID
         if re.match(r'^[a-zA-Z0-9_-]{11}$', target):
             return target
