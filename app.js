@@ -169,7 +169,7 @@ async function loadInitialData() {
 
   try {
     const [postsRes, bulliesRes, hashRes] = await Promise.all([
-      fetch('/api/posts?limit=30'),
+      fetch('/api/posts?limit=80'),
       fetch('/api/bullies'),
       fetch('/api/hashtags')
     ]);
@@ -1433,6 +1433,25 @@ function initUIEventListeners() {
       renderLiveFeeds();
     });
   }
+}
+
+function filterByPlatform(platform) {
+  const platformSelect = document.getElementById('filter-platform');
+  const toxSelect = document.getElementById('filter-toxicity');
+  if (platformSelect) {
+    platformSelect.value = platform;
+    state.filters.platform = platform;
+  }
+  if (toxSelect) {
+    toxSelect.value = 'all';
+    state.filters.toxicity = 'all';
+  }
+  renderLiveFeeds();
+  triggerToastAlert({
+    title: 'VAULT FILTER APPLIED',
+    desc: `Filtering live feed to show all saved ${platform.toUpperCase()} stream chats.`,
+    severity: 'info'
+  });
 }
 
 // ========================================================
